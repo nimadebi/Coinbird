@@ -50,15 +50,34 @@ async def show_coinlist(ctx):
     shitcoin_list = db.query_all_coins()
 
     list = ""
+    async with ctx.typing():
+        if len(shitcoin_list) > 0:
+            for coin in shitcoin_list:
+                price = cg.get_price(coin[0])
 
-    if len(shitcoin_list) > 0:
-        for coin in shitcoin_list:
-            price = cg.get_price(coin[0])
+                # Should possibly clean this up, someday.
+                hourly_and_daily_change = cg.get_hourly_and_daily_change(coin[0])
+                hourly_change = hourly_and_daily_change[0]
+                daily_change = hourly_and_daily_change[1]
 
-            list = list + str(shitcoin_list.index(coin) + 1) + ": " + coin[0] + " = $" + str(price) + '\n'
+                hourly_trend = "<:green_circle:872494804641153045>"
+                daily_trend = "<:green_circle:872494804641153045>"
 
-    else:
-        list = "Empty mate"
+                if hourly_change is None:
+                    hourly_trend = ""
+                    daily_trend = ""
+                else:
+                    if hourly_change < 0:
+                        hourly_trend = "<:red_circle:872495146795679815>"
+
+                    if daily_change < 0:
+                        daily_trend = "<:red_circle:872495146795679815>"
+
+                list = list + str(shitcoin_list.index(coin) + 1) + ": " + coin[0] + " = $" + str(price) + " >> " + \
+                           hourly_trend + str(hourly_change) + "% <> " + daily_trend + str(daily_change) + "%\n"
+
+        else:
+            list = "Empty mate"
 
     await send_embed(ctx.channel, list, "Coinlist")
 
