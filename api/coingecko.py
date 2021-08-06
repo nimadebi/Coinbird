@@ -71,6 +71,8 @@ def get_hourly_and_daily_change(ticker):
     """
     :param ticker: String
     :return: List - hourly and daily change in percentage [hourly, daily]
+    
+    TO DO: Make less resource intensive
     """
     l = []
 
