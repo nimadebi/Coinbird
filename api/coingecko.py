@@ -67,15 +67,14 @@ def is_top_500_coin(ticker):
 
     return False
 
-def get_hourly_and_daily_change(ticker):
+def get_daily_change(ticker, price):
     """
     :param ticker: String
-    :return: List - hourly and daily change in percentage [hourly, daily]
-    
-    TO DO: Make less resource intensive
-    """
-    l = []
+    :param price: Float - current price.
+    :return: Float - daily change in percentage [hourly, daily]
 
+    Included price parameter, to make less resource intensive, since get_price() is already called in main.py
+    """
     id = get_ticker_id(ticker.lower())
 
     if id is None:
@@ -84,15 +83,12 @@ def get_hourly_and_daily_change(ticker):
     historical_data = cg.get_coin_market_chart_by_id(id=id, vs_currency='usd', days=1, interval='hourly')
     historical_data_prices = historical_data.get('prices')
 
-    new_price = historical_data_prices[24][1]
-    old_price_hourly = historical_data_prices[23][1]
     old_price_daily = historical_data_prices[0][1]
 
-    l.append(percentage_change(new_price, old_price_hourly))
-    l.append(percentage_change(new_price, old_price_daily))
-
-    return l
+    return percentage_change(price, old_price_daily)
 
 
 def percentage_change(new, old):
     return round(((new - old)/old)*100, 1)
+
+
