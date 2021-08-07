@@ -11,8 +11,8 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix="cb ")
-# Needed for sending automatic signals, separate thread.
-channel = 0
+
+channel = 0 # Needed for automatic signals, separate thread.
 
 # Initialize list of top 500 coins. This to prevent the capture of low cap coins with similar name.
 if not os.path.isfile("coins_markets.txt"):
@@ -21,7 +21,8 @@ if not os.path.isfile("coins_markets.txt"):
 # Initialize database.
 if not os.path.isfile("coinlist.db"):
     db.create_table()
-    
+
+
 @bot.event
 async def on_message(message):
     if channel == 0 and message.content.startswith("cb "):
@@ -34,7 +35,7 @@ async def on_message(message):
     help="Adds a coin to the list. Correct usage: ... "
 )
 async def add_to_coinlist(ctx, arg):
-    coin_ticker = arg
+    coin_ticker = arg.lower()
 
     db.add_coin(coin_ticker)
 
@@ -46,7 +47,7 @@ async def add_to_coinlist(ctx, arg):
     help="Removes a coin from the list. Correct usage: ..."
 )
 async def remove_from_coinlist(ctx, arg):
-    coin_ticker = arg
+    coin_ticker = arg.lower()
 
     db.remove_coin(coin_ticker)
 
@@ -69,37 +70,24 @@ async def show_coinlist(ctx):
                 if len(coin[1]) > 0:
                     signal = "<:alarm_clock:873148072304193598>: " + coin[1]
 
-                """
-                TO DO: fix resource intensiveness of cg.get_hourly_and_daily_change(), and clean this up, someday.
-                
-                hourly_and_daily_change = cg.get_hourly_and_daily_change(coin[0])
-                hourly_change = hourly_and_daily_change[0]
-                daily_change = hourly_and_daily_change[1]
-
-                hourly_trend = "<:green_circle:872494804641153045>"
+                daily_change = cg.get_daily_change(coin[0], price)
                 daily_trend = "<:green_circle:872494804641153045>"
 
-                if hourly_change is None:
-                    hourly_trend = ""
+                if daily_change is None:
                     daily_trend = ""
                 else:
-                    if hourly_change < 0:
-                        hourly_trend = "<:red_circle:872495146795679815>"
-
                     if daily_change < 0:
                         daily_trend = "<:red_circle:872495146795679815>"
 
-                list = list + str(shitcoin_list.index(coin) + 1) + ": " + coin[0] + " = $" + str(price) + " >> " + \
-                       hourly_trend + str(hourly_change) + "% <> " + daily_trend + str(daily_change) + "%\n"
-                """
 
                 list = list + str(shitcoin_list.index(coin) + 1) + ": " + coin[0] + " = $" + str(price) + \
-                       " " + signal + "\n"
+                       " (" + daily_trend + str(daily_change) + "%) " + signal + "\n"
         else:
             list = "Empty mate"
 
     await send_embed(ctx.channel, list, "Coinlist")
-    
+
+
 @bot.command(
     name="signal",
     help="Add signal trigger price to coin"
@@ -132,15 +120,15 @@ async def add_signal(ctx, *arg):
 async def send_embed(channel, message, title):
     embed = discord.Embed(
         title=title,
-        description=message,
+        description=message ,
         colour=discord.Colour.dark_purple()
     )
 
-    embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/812061601862647818/"
-                            "a6a1cf799a1379e3e6f5378c46a0c303.png?size=256")
+    embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/872176661804777543/"
+                            "96245f47c1e2f2d402b10d75159b316b.webp?size=256")
 
     await channel.send(embed=embed)
-    
+
 async def check_coins_thread():
     await bot.wait_until_ready()
 
@@ -160,12 +148,12 @@ async def check_coins_thread():
 
             signal_type = signal_price[:1]
             if signal_type == "<":
-                if price <= int(signal_price[1:]):
+                if price <= float(signal_price[1:]):
                     db.update_signal(coin_ticker, "")
                     await send_embed(channel, "PRICE TARGET HIT! " + coin_ticker + signal_price, "SIGNAL")
 
             else:
-                if price >= int(signal_price[1:]):
+                if price >= float(signal_price[1:]):
                     db.update_signal(coin_ticker, "")
                     await send_embed(channel, "PRICE TARGET HIT! " + coin_ticker + signal_price, "SIGNAL")
 
