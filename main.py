@@ -125,7 +125,7 @@ async def send_embed(channel, message, title):
     )
 
     embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/872176661804777543/"
-                            "96245f47c1e2f2d402b10d75159b316b.webp?size=256")
+                            "96245f47c1e2f2d402b10d75159b316b.png?size=256")
 
     await channel.send(embed=embed)
 
