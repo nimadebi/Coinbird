@@ -1,5 +1,5 @@
 # Coinbird
-Simple discord bot to store coins in list for blackbird discord server: https://discord.gg/jBjudugeBa
+Simple discord bot to store coins in list and some extra features.
 
 Create your own .env file containing:\
 DISCORD_TOKEN=(your discord token)\
